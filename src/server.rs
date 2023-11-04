@@ -26,7 +26,7 @@ async fn start() -> std::io::Result<()> {
 
     // Start the HTTP server
     let mut server = HttpServer::new(move || {
-        let cms = UnnamedCms::new(&surreal).prefix("/admin");
+        let cms = UnnamedCms::new(&surreal);
         App::new().wrap(Logger::default()).configure(|cfg| {
             cms.config(cfg);
         })

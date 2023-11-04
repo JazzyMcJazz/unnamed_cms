@@ -1,7 +1,18 @@
 use actix_web::web::{self, ServiceConfig};
 
-use crate::views;
+use crate::api;
 
-pub fn configure(cfg: &mut ServiceConfig, prefix: &str) {
-    cfg.route(prefix, web::get().to(views::index::index));
+use super::security::middlware::{Authentication, Authorization};
+
+pub fn configure(cfg: &mut ServiceConfig, prefix: &'static str) {
+    cfg.service(
+        web::scope(prefix)
+            .wrap(Authentication::new(prefix))
+            .route("/login", web::get().to(api::html::login))
+            .service(
+                web::scope("")
+                    .wrap(Authorization::new(prefix))
+                    .route("", web::get().to(api::html::index)),
+            ),
+    );
 }
