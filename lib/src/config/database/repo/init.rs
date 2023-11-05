@@ -1,14 +1,16 @@
-use crate::utils::query_strings::*;
+use crate::{utils::query_strings::*, config::database::repo::info::{table_names, TableFilter}};
 use serde::Deserialize;
 use surrealdb::{engine::any::Any, Error, Surreal};
 
 #[derive(Deserialize)]
 struct Created {
     email: String,
-}
+} 
 
 pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
     // dev_clear(&db).await?;
+
+    dbg!(table_names(db, TableFilter::All).await);
 
     let mut admin_credentials_supplied = true;
 
