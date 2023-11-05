@@ -19,7 +19,8 @@ impl Extensions {
     pub fn unwrap_claims_and_context(req: &HttpRequest) -> (Claims, Context) {
         let ext = req.extensions();
 
-        let claims = ext.get::<Claims>().cloned().unwrap();
+        let claims = ext.get::<Claims>().cloned().unwrap_or(Claims::new_anon());
+
         let context = ext
             .get::<Context>()
             .cloned()

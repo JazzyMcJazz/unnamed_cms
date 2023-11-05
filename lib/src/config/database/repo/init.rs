@@ -7,8 +7,8 @@ struct Created {
     email: String,
 }
 
-pub async fn configure(db: &Surreal<Any>) -> Result<(), Error> {
-    // dev_clear(db).await?;
+pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
+    // dev_clear(&db).await?;
 
     let mut admin_credentials_supplied = true;
 

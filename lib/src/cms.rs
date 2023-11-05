@@ -1,4 +1,4 @@
-use crate::config::{self, app_state::AppState};
+use crate::config::{self, app_state::AppState, database::Repository};
 use actix_web::web::ServiceConfig;
 use surrealdb::{engine::any::Any, Error, Surreal};
 
@@ -74,7 +74,7 @@ impl<'a> UnnamedCms<'a> {
     pub fn new(database: &'a Surreal<Any>) -> Self {
         Self {
             database,
-            prefix: "",
+            prefix: "/cms",
         }
     }
 
@@ -129,7 +129,7 @@ impl<'a> UnnamedCms<'a> {
     /// This function is called by the ActixWeb framework
     ///
     pub fn config(&self, cfg: &mut ServiceConfig) {
-        let app_state = AppState::new(self.database.clone());
+        let app_state = AppState::new(self.database.clone(), self.prefix);
         config::app_data::configure(cfg, app_state);
         config::routes::configure(cfg, self.prefix);
     }
@@ -156,7 +156,7 @@ impl<'a> UnnamedCms<'a> {
     /// This function should be called before starting the HTTP server
     ///
     pub async fn init_db(db: &Surreal<Any>) -> Result<(), Error> {
-        config::database::configure(db).await?;
+        db.init().await?;
         Ok(())
     }
 }

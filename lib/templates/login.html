@@ -3,15 +3,22 @@
 {% block main %}
     <h1>Login</h1>
 
-    <form action="{{prefix}}/login" method="post" autocomplete="off">
+    <form 
+        action="{{prefix}}/login" 
+        method="post" 
+        autocomplete="off"
+        hx-post="{{prefix}}/login"
+        hx-ext="response-targets"
+        hx-target-4*="#error"
+    >
         <div>
             <label for="email">Email</label>
-            <input type="text" name="email" id="email">
+            <input type="text" name="email" id="email" value="admin@frh7wo6hkg.com">
         </div>
 
         <div>
             <label for="password">Password</label>
-            <input type="password" name="password" id="password">
+            <input type="password" name="password" id="password" value="toGq99hAXaqiWyTWtU4xOQpDJh5Ejwx7">
         </div>
 
         <div>
@@ -20,6 +27,8 @@
                 Remember Me
             </label>
         </div>
+
+        <p id="error" style="color: red;"></p>
 
         <div>
             <input type="submit" value="Login">

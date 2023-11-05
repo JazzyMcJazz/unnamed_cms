@@ -8,11 +8,16 @@ pub fn configure(cfg: &mut ServiceConfig, prefix: &'static str) {
     cfg.service(
         web::scope(prefix)
             .wrap(Authentication::new(prefix))
-            .route("/login", web::get().to(api::html::login))
+            .service(
+                web::scope("/login")
+                    .route("", web::get().to(api::html::login_page))
+                    .route("", web::post().to(api::html::login)),
+            )
             .service(
                 web::scope("")
                     .wrap(Authorization::new(prefix))
-                    .route("", web::get().to(api::html::index)),
+                    .route("", web::get().to(api::html::index))
+                    .route("/logout", web::post().to(api::html::logout)),
             ),
     );
 }

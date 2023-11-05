@@ -4,9 +4,8 @@ use actix_web::{
     Error, HttpMessage, HttpResponse, ResponseError,
 };
 use futures_util::future::LocalBoxFuture;
-use jsonwebtoken::DecodingKey;
 use std::{
-    env, fmt,
+    fmt,
     future::{ready, Ready},
 };
 use tera::Context;
@@ -66,30 +65,30 @@ where
 
         // Add the current path to the context
         context.insert("path", req.path());
-        context.insert("next", "/");
-        context.insert("prefix", self.prefix);
+        context.insert("next", self.prefix);
+        context.insert("prefix", if self.prefix == "/" { "" } else { self.prefix });
 
         // Add the next path to the context (if it exists)
         req.query_string().split('&').for_each(|q| {
             if q.contains("next=") {
-                context.insert("next", q.split('=').last().unwrap_or("/"));
+                context.insert("next", q.split('=').last().unwrap_or(self.prefix));
             }
         });
 
         // Add the user to the context (if they are logged in)
-        if let Some(cookie) = req.cookie("id") {
-            let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-            let token_data = jsonwebtoken::decode::<Claims>(
-                cookie.value(),
-                &DecodingKey::from_secret(secret.as_ref()),
-                &jsonwebtoken::Validation::default(),
-            );
+        let claims: Claims;
+        if let Some(cookie) = req.cookie("cms_id") {
+            claims = match Claims::from_jwt(cookie.value()) {
+                Ok(claims) => claims,
+                Err(_) => Claims::new_anon(),
+            };
 
-            if let Ok(token) = token_data {
-                context.insert("user", &token.claims);
-                req.extensions_mut().insert(token.claims);
-            }
+            context.insert("user", &claims);
+        } else {
+            claims = Claims::new_anon();
         }
+
+        req.extensions_mut().insert(claims);
 
         // Add the context to the request extensions
         if req.method() == "GET" {
@@ -154,7 +153,9 @@ where
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         // Check if the user is logged into the relevant app and redirect if not
-        if req.extensions().get::<Claims>().is_none() {
+        if req.extensions().get::<Claims>().is_none()
+            || !req.extensions().get::<Claims>().unwrap().is_authenticated
+        {
             let prefix = self.prefix;
             return Box::pin(async move {
                 Err(AuthError {

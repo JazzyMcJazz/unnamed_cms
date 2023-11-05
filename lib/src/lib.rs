@@ -52,4 +52,5 @@ pub mod cms;
 mod api;
 mod config;
 mod prelude;
+mod service;
 mod utils;
