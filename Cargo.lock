@@ -3811,15 +3811,6 @@ name = "unnamed_cms"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "env_logger",
- "unnamed_cms_lib",
-]
-
-[[package]]
-name = "unnamed_cms_lib"
-version = "0.1.0"
-dependencies = [
- "actix-web",
  "async-trait",
  "chrono",
  "futures-util",
@@ -3827,6 +3818,15 @@ dependencies = [
  "serde",
  "surrealdb",
  "tera",
+]
+
+[[package]]
+name = "unnamed_cms_server"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "env_logger",
+ "unnamed_cms",
 ]
 
 [[package]]

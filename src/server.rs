@@ -2,8 +2,8 @@ use std::env;
 
 use actix_web::{self, middleware::Logger, App, HttpServer};
 use env_logger::Env;
-use unnamed_cms_lib::cms::UnnamedCms;
-use unnamed_cms_lib::surrealdb::{engine::any::connect, opt::auth::Root};
+use unnamed_cms::cms::UnnamedCms;
+use unnamed_cms::surrealdb::{engine::any::connect, opt::auth::Root};
 
 #[actix_web::main]
 async fn start() -> std::io::Result<()> {

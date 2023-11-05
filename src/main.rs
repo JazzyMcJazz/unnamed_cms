@@ -1,7 +1,7 @@
 use std::env;
 
 mod server;
-extern crate unnamed_cms_lib;
+extern crate unnamed_cms;
 
 fn main() {
     // TODO: Remove this when deploying
