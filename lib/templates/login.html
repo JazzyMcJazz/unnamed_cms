@@ -2,4 +2,27 @@
 
 {% block main %}
     <h1>Login</h1>
+
+    <form action="{{prefix}}/login" method="post" autocomplete="off">
+        <div>
+            <label for="email">Email</label>
+            <input type="text" name="email" id="email">
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password">
+        </div>
+
+        <div>
+            <label for="remember_me">
+                <input type="checkbox" name="remember_me" id="remember_me">
+                Remember Me
+            </label>
+        </div>
+
+        <div>
+            <input type="submit" value="Login">
+        </div>
+    </form>
 {% endblock main %}
