@@ -1,11 +1,14 @@
-use crate::{utils::query_strings::*, config::database::repo::info::{table_names, TableFilter}};
+use crate::{
+    config::database::repo::info::{table_names, TableFilter},
+    utils::query_strings::*,
+};
 use serde::Deserialize;
 use surrealdb::{engine::any::Any, Error, Surreal};
 
 #[derive(Deserialize)]
 struct Created {
     email: String,
-} 
+}
 
 pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
     // dev_clear(&db).await?;
@@ -26,9 +29,20 @@ pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
         }
     };
 
-    db.query(DEFINE_TABLES).await?;
-    db.query(DEFINE_FIELDS).await?;
-    db.query(DEFINE_INDEXES).await?;
+    let queries: &str = &format!(
+        r#"
+        {DEFINE_TABLES}
+        {DEFINE_SESSION_TOKEN_FIELDS}
+        {DEFINE_SESSION_FIELDS}
+        {DEFINE_USER_FIELDS}
+        {DEFINE_PERMISSION_FIELDS}
+        {DEFINE_RESOURCE_FIELDS}
+        {DEFINE_INDEXES}
+        {CREATE_SYSTEM_RESOURCES}
+        "#
+    );
+
+    db.query(queries).await?;
 
     // Create admin user if it doesn't exist
     let mut result = db
@@ -42,25 +56,31 @@ pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
     let generated_password = generated_password.unwrap();
 
     // Print admin credentials if they were generated
-    if let Ok(created) = created {
-        if !admin_credentials_supplied {
-            let email = created.unwrap().email;
-            let email_spaces = if email.len() < generated_password.len() {
-                " ".repeat(generated_password.len() - email.len())
-            } else {
-                "".to_string()
-            };
-            let password_spaces = if generated_password.len() < email.len() {
-                " ".repeat(email.len() - generated_password.len())
-            } else {
-                "".to_string()
-            };
+    match created {
+        Ok(created) => {
+            if !admin_credentials_supplied {
+                let email = created.unwrap().email;
+                // TODO: Use proper formatting
+                let email_spaces = if email.len() < generated_password.len() {
+                    " ".repeat(generated_password.len() - email.len())
+                } else {
+                    "".to_string()
+                };
+                let password_spaces = if generated_password.len() < email.len() {
+                    " ".repeat(email.len() - generated_password.len())
+                } else {
+                    "".to_string()
+                };
 
-            println!("##############################################");
-            println!("#        Generated Admin Credentials:        #");
-            println!("# Email:    {email}{email_spaces} #");
-            println!("# Password: {generated_password}{password_spaces} #");
-            println!("##############################################");
+                println!("##############################################");
+                println!("#        Generated Admin Credentials:        #");
+                println!("# Email:    {email}{email_spaces} #");
+                println!("# Password: {generated_password}{password_spaces} #");
+                println!("##############################################");
+            }
+        }
+        Err(e) => {
+            panic!("Error creating default admin user: {e}");
         }
     }
 

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use surrealdb::{Surreal, engine::any::Any};
+use surrealdb::{engine::any::Any, Surreal};
 
 pub enum TableFilter {
     #[allow(dead_code)]
@@ -20,9 +20,8 @@ async fn info(db: &Surreal<Any>) -> HashMap<String, HashMap<String, String>> {
 #[allow(dead_code)]
 pub async fn table_names(db: &Surreal<Any>, filter: TableFilter) -> Vec<String> {
     let info = info(db).await;
-    
+
     if let Some(tables) = info.get("tables") {
-        dbg!(&tables);
         match filter {
             TableFilter::System => tables
                 .iter()
@@ -34,10 +33,7 @@ pub async fn table_names(db: &Surreal<Any>, filter: TableFilter) -> Vec<String> 
                 .filter(|(k, _)| !k.starts_with("system_"))
                 .map(|(k, _)| k.clone())
                 .collect(),
-            TableFilter::All => tables
-                .iter()
-                .map(|(k, _)| k.clone())
-                .collect(),
+            TableFilter::All => tables.iter().map(|(k, _)| k.clone()).collect(),
         }
     } else {
         Vec::new()
