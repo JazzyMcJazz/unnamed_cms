@@ -1,7 +1,7 @@
 use crate::{
     config::database::models::SystemUser,
     prelude::*,
-    utils::{query_strings::FIND_USER_BY_CREDS, CmsError},
+    utils::{query_strings::*, CmsError},
 };
 
 pub async fn find_by_credentials(
@@ -9,7 +9,7 @@ pub async fn find_by_credentials(
     (email, password): (String, String),
 ) -> Result<SystemUser, CmsError> {
     let mut result = match db
-        .query(FIND_USER_BY_CREDS)
+        .query(FIND_USER_BY_CREDENTIALS)
         .bind(("email", &email))
         .bind(("password", &password))
         .await
