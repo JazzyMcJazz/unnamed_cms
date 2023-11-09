@@ -8,7 +8,7 @@ pub struct Extensions;
 impl Extensions {
     pub fn unwrap_claims(req: &HttpRequest) -> Claims {
         let ext = req.extensions();
-        ext.get::<Claims>().cloned().unwrap()
+        ext.get::<Claims>().cloned().unwrap_or(Claims::new_anon())
     }
 
     pub fn unwrap_context(req: &HttpRequest) -> Context {

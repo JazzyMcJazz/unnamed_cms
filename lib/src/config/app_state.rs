@@ -23,7 +23,7 @@ pub struct AppState {
 impl AppState {
     pub fn new(database: Surreal<Any>, base_path: &'static str) -> Self {
         let template_dir = "lib/templates/**/*.html";
-        let tera = Tera::new(template_dir).unwrap();
+        let tera = Tera::new(template_dir).expect("Failed to compile templates");
 
         Self {
             database,

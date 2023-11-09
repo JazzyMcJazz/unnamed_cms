@@ -9,17 +9,25 @@ use unnamed_cms::surrealdb::{engine::any::connect, opt::auth::Root};
 async fn start() -> std::io::Result<()> {
     // Establish connection to the SurrealDB database
     let surreal_url = env::var("SURREAL_URL").expect("SURREAL_URL is not set in envrionment");
-    let surreal = connect(surreal_url).await.unwrap();
+    let surreal = connect(surreal_url)
+        .await
+        .expect("Failed to connect to SurrealDB");
     surreal
         .signin(Root {
             username: &env::var("SURREAL_USER").expect("SURREAL_USER is not set in environment"),
             password: &env::var("SURREAL_PASS").expect("SURREAL_PASS is not set in environment"),
         })
         .await
-        .unwrap();
-    surreal.use_ns("cms").use_db("cms").await.unwrap();
+        .expect("Failed to sign in to SurrealDB");
+    surreal
+        .use_ns("cms")
+        .use_db("cms")
+        .await
+        .expect("Failed to use 'cms' namespace and database");
 
-    UnnamedCms::init_db(&surreal).await.unwrap();
+    UnnamedCms::init_db(&surreal)
+        .await
+        .expect("Failed to initialize CMS database");
     let cms = UnnamedCms::new(surreal);
 
     // Initialize logger
