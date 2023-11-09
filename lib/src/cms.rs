@@ -33,7 +33,7 @@ use surrealdb::{engine::any::Any, Error, Surreal};
 ///
 ///     // Start the HTTP server
 ///     let mut server = HttpServer::new(move || {
-///         let cms = UnnamedCms::new(&surreal).prefix("/");
+///         let cms = UnnamedCms::new(&surreal).base_path("/");
 ///
 ///         App::new()
 ///             .configure(|cfg| {
@@ -48,12 +48,13 @@ use surrealdb::{engine::any::Any, Error, Surreal};
 ///     Ok(())
 /// }
 /// ```
-pub struct UnnamedCms<'a> {
-    database: &'a Surreal<Any>,
-    prefix: &'static str,
+#[derive(Clone)]
+pub struct UnnamedCms {
+    database: Surreal<Any>,
+    base_path: &'static str,
 }
 
-impl<'a> UnnamedCms<'a> {
+impl UnnamedCms {
     ///
     /// Create a new instance of the CMS
     ///
@@ -71,25 +72,25 @@ impl<'a> UnnamedCms<'a> {
     ///
     /// * `Self` - The CMS instance
     ///
-    pub fn new(database: &'a Surreal<Any>) -> Self {
+    pub fn new(database: Surreal<Any>) -> Self {
         Self {
             database,
-            prefix: "/cms",
+            base_path: "/cms",
         }
     }
 
     ///
-    /// Set the prefix for the CMS routes
+    /// Set the base path for the CMS routes
     ///
     /// ### Example
     ///
     /// ```
-    /// let cms = UnnamedCms::new(&surreal).prefix("/cms");
+    /// let cms = UnnamedCms::new(&surreal).base_path("/cms");
     /// ```
     ///
     /// ### Arguments
     ///
-    /// * `prefix` - The prefix for the CMS routes
+    /// * `base_path` - The base path for the CMS routes
     ///
     /// ### Returns
     ///
@@ -97,10 +98,10 @@ impl<'a> UnnamedCms<'a> {
     ///
     /// ### Remarks
     ///
-    /// The default prefix is `/`
+    /// The default base path is `/cms`
     ///
-    pub fn prefix(mut self, prefix: &'static str) -> Self {
-        self.prefix = prefix;
+    pub fn base_path(mut self, base_path: &'static str) -> Self {
+        self.base_path = base_path;
         self
     }
 
@@ -113,7 +114,7 @@ impl<'a> UnnamedCms<'a> {
     /// use actix_web::{self, App, HttpServer};
     ///
     /// let mut server = HttpServer::new(move || {
-    ///    let cms = UnnamedCms::new(&surreal).prefix("/");
+    ///    let cms = UnnamedCms::new(&surreal).base_path("/");
     ///    App::new().configure(|cfg| {
     ///        cms.config(cfg);
     ///    })
@@ -129,9 +130,9 @@ impl<'a> UnnamedCms<'a> {
     /// This function is called by the ActixWeb framework
     ///
     pub fn config(&self, cfg: &mut ServiceConfig) {
-        let app_state = AppState::new(self.database.clone(), self.prefix);
+        let app_state = AppState::new(self.database.clone(), self.base_path);
         config::app_data::configure(cfg, app_state);
-        config::routes::configure(cfg, self.prefix);
+        config::routes::configure(cfg, self.base_path);
     }
 
     ///

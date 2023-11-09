@@ -4,12 +4,13 @@
     <h1>Login</h1>
 
     <form 
-        action="{{prefix}}/login" 
+        action="{{base_path}}/login" 
         method="post" 
         autocomplete="off"
-        hx-post="{{prefix}}/login"
+        hx-post="{{base_path}}/login"
         hx-ext="response-targets"
         hx-target-4*="#error"
+        hx-target-5*="#error"
     >
         <div>
             <label for="email">Email</label>
@@ -18,7 +19,7 @@
 
         <div>
             <label for="password">Password</label>
-            <input type="password" name="password" id="password" value="1234">
+            <input type="password" name="password" id="password" value="asdf1234">
         </div>
 
         <div>

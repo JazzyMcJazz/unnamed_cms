@@ -1,3 +1,5 @@
+-- BEGIN TRANSACTION;
+
 #################
 # DEFINE TABLES #
 #################
@@ -23,15 +25,16 @@ DEFINE FIELD admin ON TABLE system_user TYPE bool
     DEFAULT false;
 DEFINE FIELD created_at ON TABLE system_user TYPE datetime
     DEFAULT time::now();
-DEFINE FIELD sessions.* ON TABLE system_user TYPE record<system_session>;
+-- DEFINE FIELD sessions.* ON TABLE system_user TYPE record<system_session>;
 
 -- system_session
-DEFINE FIELD tokens.* ON TABLE system_session TYPE record<system_session_token>;
+DEFINE FIELD user ON TABLE system_session TYPE record<system_user>;
+-- DEFINE FIELD tokens.* ON TABLE system_session TYPE record<system_session_token>;
 
 -- system_sesssion_token
+DEFINE FIELD session ON TABLE system_session_token TYPE record<system_session>;
 DEFINE FIELD token ON TABLE system_session_token TYPE string
     DEFAULT rand::ulid();
-DEFINE FIELD iterations ON TABLE system_session_token TYPE int;
 DEFINE FIELD created_at ON TABLE system_session_token TYPE datetime
     DEFAULT time::now();
 DEFINE FIELD expires_at ON TABLE system_session_token TYPE datetime;
@@ -108,6 +111,17 @@ IF !(SELECT * FROM system_resource:system_resource) {
     };
 };
 
+#################
+# DEFINE EVENTS #
+#################
+DEFINE EVENT session_deleted ON TABLE system_session WHEN $event = "DELETE" THEN (
+    DELETE FROM system_session_token WHERE session = $before.id
+); 
+
+DEFINE EVENT user_deleted ON TABLE system_user WHEN $event = "DELETE" THEN (
+    DELETE FROM system_session WHERE user = $before.id
+);
+
 ########################
 # CREATE DEFAULT ADMIN #
 ########################
@@ -124,3 +138,5 @@ IF !(SELECT * FROM system_user:admin) {
 };
 
 RETURN $password;
+
+-- COMMIT TRANSACTION;

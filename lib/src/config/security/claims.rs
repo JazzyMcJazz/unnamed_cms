@@ -4,23 +4,36 @@ use crate::prelude::*;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 
+pub struct RefreshToken {
+    pub token: String,
+    pub exp: chrono::DateTime<chrono::Utc>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
     email: String,
     name: String,
-    exp: usize,
+    pub session_id: String,
+    pub exp: usize,
     pub is_authenticated: bool,
 }
 
 impl Claims {
-    pub fn new(sub: String, email: String, name: String, is_authenticated: bool) -> Self {
+    pub fn new(
+        sub: String,
+        email: String,
+        name: String,
+        session_id: String,
+        is_authenticated: bool,
+    ) -> Self {
         // TODO: Make this configurable
-        let exp = chrono::Utc::now().timestamp() + 60 * 60 * 24 * 365; // 365 days
+        let exp = chrono::Utc::now().timestamp() + 60 * 15; // 15 minutes
         Self {
             sub,
             email,
             name,
+            session_id,
             exp: exp as usize,
             is_authenticated,
         }
@@ -31,6 +44,7 @@ impl Claims {
             sub: "".to_string(),
             email: "".to_string(),
             name: "".to_string(),
+            session_id: "".to_string(),
             exp: 0,
             is_authenticated: false,
         }
@@ -64,5 +78,39 @@ impl Claims {
         };
 
         Ok(claims)
+    }
+
+    pub async fn from_refresh_token(
+        db: &Surreal<Any>,
+        token: &str,
+    ) -> (Self, Option<RefreshToken>) {
+        let refresh_token = match db.refresh_session(token).await {
+            Ok(session) => session,
+            Err(_) => return (Self::new_anon(), None),
+        };
+
+        if refresh_token.expires_at < chrono::Utc::now() {
+            let _ = db
+                .delete_session(refresh_token.session.id.id.to_raw())
+                .await;
+            return (Self::new_anon(), None);
+        }
+
+        let session = refresh_token.session;
+        let user = session.user;
+
+        (
+            Self::new(
+                user.id.id.to_raw(),
+                user.email,
+                user.name,
+                session.id.id.to_raw(),
+                true,
+            ),
+            Some(RefreshToken {
+                token: refresh_token.token,
+                exp: refresh_token.expires_at,
+            }),
+        )
     }
 }

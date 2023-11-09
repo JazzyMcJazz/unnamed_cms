@@ -20,13 +20,13 @@ async fn start() -> std::io::Result<()> {
     surreal.use_ns("cms").use_db("cms").await.unwrap();
 
     UnnamedCms::init_db(&surreal).await.unwrap();
+    let cms = UnnamedCms::new(surreal);
 
     // Initialize logger
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     // Start the HTTP server
     let mut server = HttpServer::new(move || {
-        let cms = UnnamedCms::new(&surreal);
         App::new().wrap(Logger::default()).configure(|cfg| {
             cms.config(cfg);
         })

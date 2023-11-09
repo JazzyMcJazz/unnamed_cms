@@ -29,7 +29,7 @@
 ///
 ///     // Start the HTTP server
 ///     let mut server = HttpServer::new(move || {
-///         let cms = UnnamedCms::new(&surreal).prefix("/");
+///         let cms = UnnamedCms::new(&surreal).base_path("/");
 ///
 ///         App::new()
 ///             .configure(|cfg| {

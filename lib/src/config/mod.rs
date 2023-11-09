@@ -5,4 +5,4 @@ pub mod routes;
 
 mod security;
 
-pub use self::security::claims::Claims;
+pub use self::security::claims::{Claims, RefreshToken};

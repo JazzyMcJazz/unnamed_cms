@@ -17,18 +17,18 @@ impl TemplateError for Tera {
 pub struct AppState {
     database: Surreal<Any>,
     tera: Tera,
-    prefix: &'static str,
+    base_path: &'static str,
 }
 
 impl AppState {
-    pub fn new(database: Surreal<Any>, prefix: &'static str) -> Self {
+    pub fn new(database: Surreal<Any>, base_path: &'static str) -> Self {
         let template_dir = "lib/templates/**/*.html";
         let tera = Tera::new(template_dir).unwrap();
 
         Self {
             database,
             tera,
-            prefix,
+            base_path,
         }
     }
 
@@ -40,10 +40,10 @@ impl AppState {
         &self.tera
     }
 
-    pub fn prefix(&self) -> &'static str {
-        if self.prefix.is_empty() {
+    pub fn base_path(&self) -> &'static str {
+        if self.base_path.is_empty() {
             return "/";
         }
-        self.prefix
+        self.base_path
     }
 }

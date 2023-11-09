@@ -8,8 +8,8 @@ pub async fn login_page(data: web::Data<AppState>, req: HttpRequest) -> impl Res
 
     if claims.is_authenticated {
         return HttpResponse::Found()
-            .append_header(("Location", data.prefix()))
-            .append_header(("HX-Redirect", data.prefix()))
+            .append_header(("Location", data.base_path()))
+            .append_header(("HX-Redirect", data.base_path()))
             .finish();
     }
 
@@ -28,30 +28,32 @@ pub async fn login(
     let claims = Extensions::unwrap_claims(&req);
 
     if claims.is_authenticated {
-        return CmsError::SeeOther(data.prefix()).build_response();
+        return CmsError::SeeOther(data.base_path()).build_response();
     }
 
-    let auth_cookie = match service::login(data.database(), data.prefix(), form.into_inner()).await
-    {
-        Ok(cookie) => cookie,
+    let cookies = match service::login(data.database(), data.base_path(), form.into_inner()).await {
+        Ok(cookies) => cookies,
         Err(e) => {
             return e.build_response();
         }
     };
 
     HttpResponse::Ok()
-        .append_header(("Location", data.prefix())) // TODO: redirect to next
-        .append_header(("HX-Redirect", data.prefix())) // TODO: redirect to next
-        .cookie(auth_cookie)
+        .append_header(("Location", data.base_path())) // TODO: redirect to next
+        .append_header(("HX-Redirect", data.base_path())) // TODO: redirect to next
+        .cookie(cookies.0)
+        .cookie(cookies.1)
         .finish()
 }
 
-pub async fn logout(data: web::Data<AppState>) -> impl Responder {
-    let auth_cookie = service::logout(data.prefix());
+pub async fn logout(data: web::Data<AppState>, req: HttpRequest) -> impl Responder {
+    let claims = Extensions::unwrap_claims(&req);
+    let cookies = service::logout(data.database(), claims, data.base_path()).await;
 
     HttpResponse::Ok()
-        .append_header(("Location", data.prefix()))
-        .append_header(("HX-Redirect", data.prefix()))
-        .cookie(auth_cookie)
+        .append_header(("Location", data.base_path()))
+        .append_header(("HX-Redirect", data.base_path()))
+        .cookie(cookies.0)
+        .cookie(cookies.1)
         .finish()
 }

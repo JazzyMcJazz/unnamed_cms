@@ -11,7 +11,7 @@ struct Created {
 }
 
 pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
-    // dev_clear(db).await?;
+    dev_clear(db).await?;
 
     dbg!(table_names(db, TableFilter::All).await);
 

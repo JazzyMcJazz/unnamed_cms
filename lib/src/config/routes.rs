@@ -4,10 +4,10 @@ use crate::api;
 
 use super::security::middlware::{Authentication, Authorization};
 
-pub fn configure(cfg: &mut ServiceConfig, prefix: &'static str) {
+pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
     cfg.service(
-        web::scope(prefix)
-            .wrap(Authentication::new(prefix))
+        web::scope(base_path)
+            .wrap(Authentication {})
             .service(
                 web::scope("/login")
                     .route("", web::get().to(api::html::login_page))
@@ -15,7 +15,7 @@ pub fn configure(cfg: &mut ServiceConfig, prefix: &'static str) {
             )
             .service(
                 web::scope("")
-                    .wrap(Authorization::new(prefix))
+                    .wrap(Authorization::new(base_path))
                     .route("", web::get().to(api::html::index))
                     .route("/logout", web::post().to(api::html::logout)),
             ),

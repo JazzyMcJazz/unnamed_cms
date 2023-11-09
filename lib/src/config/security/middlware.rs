@@ -1,103 +1,132 @@
 use actix_web::{
+    cookie::{time::OffsetDateTime, Cookie},
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     http::StatusCode,
-    Error, HttpMessage, HttpResponse, ResponseError,
+    web, Error, HttpMessage, HttpResponse, ResponseError,
 };
 use futures_util::future::LocalBoxFuture;
 use std::{
     fmt,
     future::{ready, Ready},
+    rc::Rc,
 };
 use tera::Context;
+
+use crate::{config::app_state::AppState, service::handle_authentication};
 
 use super::claims::Claims;
 
 /// Middleware for authenticating users
 /// Adds the user's ID to the request extensions
 /// Should be applied to all routes
-pub struct Authentication {
-    prefix: &'static str,
-}
+pub struct Authentication;
 
-impl Authentication {
-    pub fn new(prefix: &'static str) -> Self {
-        Authentication { prefix }
-    }
-}
-
-impl<S, B> Transform<S, ServiceRequest> for Authentication
+impl<S: 'static, B> Transform<S, ServiceRequest> for Authentication
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
+    B: 'static,
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Transform = AuthenticationMiddleware<S>;
     type InitError = ();
+    type Transform = AuthenticationMiddleware<S>;
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
         ready(Ok(AuthenticationMiddleware {
-            service,
-            prefix: self.prefix,
+            service: Rc::new(service),
         }))
     }
 }
 
 pub struct AuthenticationMiddleware<S> {
-    service: S,
-    prefix: &'static str,
+    service: Rc<S>,
 }
 
 impl<S, B> Service<ServiceRequest> for AuthenticationMiddleware<S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error> + 'static,
     S::Future: 'static,
+    B: 'static,
 {
-    type Response = S::Response;
+    type Response = ServiceResponse<B>;
     type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
+        let svc = self.service.clone();
+        let state = req.app_data::<web::Data<AppState>>().unwrap().clone();
+
         let mut context = Context::new();
 
         // Add the current path to the context
         context.insert("path", req.path());
-        context.insert("next", self.prefix);
-        context.insert("prefix", if self.prefix == "/" { "" } else { self.prefix });
+        context.insert("next", state.base_path());
+        context.insert(
+            "base_path",
+            if state.base_path() == "/" {
+                ""
+            } else {
+                state.base_path()
+            },
+        );
 
         // Add the next path to the context (if it exists)
         req.query_string().split('&').for_each(|q| {
             if q.contains("next=") {
-                context.insert("next", q.split('=').last().unwrap_or(self.prefix));
+                context.insert("next", q.split('=').last().unwrap_or(state.base_path()));
             }
         });
 
-        // Add the user to the context (if they are logged in)
-        let claims: Claims;
-        if let Some(cookie) = req.cookie("cms_id") {
-            claims = match Claims::from_jwt(cookie.value()) {
-                Ok(claims) => claims,
-                Err(_) => Claims::new_anon(),
-            };
+        let cms_id = req.cookie("cms_id");
+        let cms_r = req.cookie("cms_r");
+
+        Box::pin(async move {
+            // Add the user to the context (if they are logged in)
+            let (claims, refresh_token) =
+                handle_authentication(state.database(), (cms_id, cms_r)).await;
 
             context.insert("user", &claims);
-        } else {
-            claims = Claims::new_anon();
-        }
+            req.extensions_mut().insert(claims.clone());
+            // Add the context to the request extensions
+            if req.method() == "GET" {
+                req.extensions_mut().insert(context);
+            }
 
-        req.extensions_mut().insert(claims);
+            let mut res = svc.call(req).await?;
 
-        // Add the context to the request extensions
-        if req.method() == "GET" {
-            req.extensions_mut().insert(context);
-        }
+            // If refresh event occurred, sign and add the new cookies to the response
+            if let Some(refresh_token) = refresh_token {
+                let exp = claims.exp as i64;
+                let result = claims.sign_jwt();
+                let access_token = match result {
+                    Ok(token) => token,
+                    Err(_) => return Ok(res),
+                };
 
-        let fut = self.service.call(req);
-        Box::pin(async move {
-            let res = fut.await?;
+                let access_cookie = Cookie::build("cms_id", access_token)
+                    .path(state.base_path())
+                    .secure(true)
+                    .http_only(true)
+                    .expires(OffsetDateTime::from_unix_timestamp(exp).unwrap())
+                    .finish();
+
+                let refresh_cookie = Cookie::build("cms_r", refresh_token.token)
+                    .path(state.base_path())
+                    .secure(true)
+                    .http_only(true)
+                    .expires(
+                        OffsetDateTime::from_unix_timestamp(refresh_token.exp.timestamp()).unwrap(),
+                    )
+                    .finish();
+
+                res.response_mut().add_cookie(&access_cookie)?;
+                res.response_mut().add_cookie(&refresh_cookie)?;
+            }
+
             Ok(res)
         })
     }
@@ -107,12 +136,12 @@ where
 /// Checks if the user is logged in
 /// Should be applied only to protected routes
 pub struct Authorization {
-    prefix: &'static str,
+    base_path: &'static str,
 }
 
 impl Authorization {
-    pub fn new(prefix: &'static str) -> Self {
-        Authorization { prefix }
+    pub fn new(base_path: &'static str) -> Self {
+        Authorization { base_path }
     }
 }
 
@@ -130,14 +159,14 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
         ready(Ok(AuthorizationMiddleware {
             service,
-            prefix: self.prefix,
+            base_path: self.base_path,
         }))
     }
 }
 
 pub struct AuthorizationMiddleware<S> {
     service: S,
-    prefix: &'static str,
+    base_path: &'static str,
 }
 
 impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
@@ -156,10 +185,10 @@ where
         if req.extensions().get::<Claims>().is_none()
             || !req.extensions().get::<Claims>().unwrap().is_authenticated
         {
-            let prefix = self.prefix;
+            let base_path = self.base_path;
             return Box::pin(async move {
                 Err(AuthError {
-                    prefix,
+                    base_path,
                     next: req.path().to_string().clone(),
                 }
                 .into())
@@ -176,7 +205,7 @@ where
 
 #[derive(Debug)]
 pub struct AuthError {
-    prefix: &'static str,
+    base_path: &'static str,
     next: String,
 }
 
@@ -188,14 +217,14 @@ impl fmt::Display for AuthError {
 
 impl ResponseError for AuthError {
     fn error_response(&self) -> HttpResponse {
-        let prefix = match self.prefix {
+        let base_path = match self.base_path {
             "/" => "",
-            _ => self.prefix,
+            _ => self.base_path,
         };
 
         let path = match self.next.as_str() {
-            "" => format!("{}/login", &prefix),
-            _ => format!("{}/login?next={}", &prefix, &self.next),
+            "" => format!("{}/login", &base_path),
+            _ => format!("{}/login?next={}", &base_path, &self.next),
         };
 
         HttpResponse::Found()
