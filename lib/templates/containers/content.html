@@ -1,0 +1,22 @@
+{% extends 'containers/base.html' %}
+
+{% block main %}
+    <div class="flex">
+        <aside class="h-main overflow-y-auto bg-slate-800 w-64 px-4 pt-2">
+            <div class="flex justify-between items-center mb-2">
+                <h5>Tables</h5>
+                <a href="{{base_path}}/content/+" class="text-green-500 text-2xl font-bold">+</button>
+            </div>
+    
+            <div class="flex flex-col gap-2 w-full">
+                {% for table in tables %}
+                    <a href="/" class="bg-slate-700 hover:brightness-125 w-full flex justify-start p-1 rounded-md">
+                        {{table.name}}
+                    </a>
+                {% endfor %}
+            </div>
+        </aside>
+        {% block content %}
+        {% endblock content %}
+    </div>
+{% endblock main %}

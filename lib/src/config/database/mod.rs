@@ -5,26 +5,32 @@ use surrealdb::{engine::any::Any, Error, Surreal};
 
 use crate::utils::CmsError;
 
-use self::models::{SessionIdToken, SessionToken, SystemUser};
+pub use self::models::ResourceType;
+use self::models::*;
 
 #[async_trait::async_trait]
 pub trait Repository {
-    // Setup
+    // SETUP
     async fn init(&self) -> Result<(), Error>;
     async fn dev_clear(&self) -> Result<(), Error>;
 
-    // Create
+    // CREATE
     async fn create_session(&self, user_id: String) -> Result<SessionIdToken, CmsError>;
-    // Read
+
+    // READ
     async fn find_user_by_credentials(
         &self,
         (email, password): (String, String),
     ) -> Result<SystemUser, CmsError>;
+    async fn find_resource_by_type(
+        &self,
+        resource_type: ResourceType,
+    ) -> Result<Vec<SystemResource>, CmsError>;
 
-    // Update
+    // UPDATE
     async fn refresh_session(&self, token: &str) -> Result<SessionToken, CmsError>;
 
-    // Delete
+    // DELETE
     async fn delete_session(&self, session_id: String) -> Result<(), CmsError>;
 }
 
@@ -48,6 +54,12 @@ impl Repository for Surreal<Any> {
         (email, password): (String, String),
     ) -> Result<SystemUser, CmsError> {
         repo::system_user::find_by_credentials(self, (email, password)).await
+    }
+    async fn find_resource_by_type(
+        &self,
+        resource_type: ResourceType,
+    ) -> Result<Vec<SystemResource>, CmsError> {
+        repo::system_resource::find_resource_by_type(self, resource_type).await
     }
 
     // Update

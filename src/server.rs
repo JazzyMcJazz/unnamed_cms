@@ -29,7 +29,7 @@ async fn start() -> std::io::Result<()> {
         .await
         .expect("Failed to initialize CMS database");
 
-    let cms = UnnamedCms::new(surreal);//.base_path("/cms");
+    let cms = UnnamedCms::new(surreal);
 
     // Initialize logger
     env_logger::init_from_env(Env::default().default_filter_or("info"));

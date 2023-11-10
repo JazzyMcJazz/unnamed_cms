@@ -1,3 +1,4 @@
+use actix_files::Files;
 use actix_web::web::{self, ServiceConfig};
 
 use crate::api;
@@ -5,6 +6,11 @@ use crate::api;
 use super::security::middlware::{Authentication, Authorization};
 
 pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
+    cfg.service(Files::new(
+        format!("{base_path}/assets").as_str(),
+        "./lib/static",
+    ));
+
     cfg.service(
         web::scope(base_path)
             .wrap(Authentication {})
@@ -16,8 +22,12 @@ pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
             .service(
                 web::scope("")
                     .wrap(Authorization {})
-                    .route( if base_path.is_empty() { "/" } else { "" }, web::get().to(api::html::index))
-                    .route("/logout", web::post().to(api::html::logout)),
+                    .route(
+                        if base_path.is_empty() { "/" } else { "" },
+                        web::get().to(api::html::index),
+                    )
+                    .route("/logout", web::post().to(api::html::logout))
+                    .route("/content", web::get().to(api::html::content_index)),
             ),
     );
 }

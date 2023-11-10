@@ -64,15 +64,8 @@ where
 
         // Add the current path to the context
         context.insert("path", req.path());
-        context.insert("next", state.base_path());
-        context.insert(
-            "base_path",
-            if state.base_path() == "/" {
-                ""
-            } else {
-                state.base_path()
-            },
-        );
+        context.insert("next", state.base_path_or_root());
+        context.insert("base_path", state.base_path());
 
         // Add the next path to the context (if it exists)
         req.query_string().split('&').for_each(|q| {
@@ -108,14 +101,14 @@ where
                 };
 
                 let access_cookie = Cookie::build("cms_id", access_token)
-                    .path(state.base_path())
+                    .path(state.base_path_or_root())
                     .secure(true)
                     .http_only(true)
                     .expires(OffsetDateTime::from_unix_timestamp(exp).unwrap())
                     .finish();
 
                 let refresh_cookie = Cookie::build("cms_r", refresh_token.token)
-                    .path(state.base_path())
+                    .path(state.base_path_or_root())
                     .secure(true)
                     .http_only(true)
                     .expires(
@@ -149,9 +142,7 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(AuthorizationMiddleware {
-            service
-        }))
+        ready(Ok(AuthorizationMiddleware { service }))
     }
 }
 
@@ -207,14 +198,9 @@ impl fmt::Display for AuthError {
 
 impl ResponseError for AuthError {
     fn error_response(&self) -> HttpResponse {
-        let base_path = match self.base_path {
-            "/" => "",
-            _ => self.base_path,
-        };
-
         let path = match self.next.as_str() {
-            "" => format!("{}/login", &base_path),
-            _ => format!("{}/login?next={}", &base_path, &self.next),
+            "" => format!("{}/login", &self.base_path),
+            _ => format!("{}/login?next={}", &self.base_path, &self.next),
         };
 
         HttpResponse::Found()

@@ -41,9 +41,14 @@ impl AppState {
     }
 
     pub fn base_path(&self) -> &'static str {
-        if self.base_path.is_empty() {
-            return "/";
-        }
         self.base_path
+    }
+
+    pub fn base_path_or_root(&self) -> &'static str {
+        if self.base_path.is_empty() {
+            "/"
+        } else {
+            self.base_path
+        }
     }
 }

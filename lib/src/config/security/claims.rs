@@ -16,6 +16,7 @@ pub struct Claims {
     name: String,
     pub session_id: String,
     pub exp: usize,
+    is_admin: bool,
     pub is_authenticated: bool,
 }
 
@@ -25,6 +26,7 @@ impl Claims {
         email: String,
         name: String,
         session_id: String,
+        is_admin: bool,
         is_authenticated: bool,
     ) -> Self {
         // TODO: Make this configurable
@@ -35,6 +37,7 @@ impl Claims {
             name,
             session_id,
             exp: exp as usize,
+            is_admin,
             is_authenticated,
         }
     }
@@ -46,6 +49,7 @@ impl Claims {
             name: "".to_string(),
             session_id: "".to_string(),
             exp: 0,
+            is_admin: false,
             is_authenticated: false,
         }
     }
@@ -105,6 +109,7 @@ impl Claims {
                 user.email,
                 user.name,
                 session.id.id.to_raw(),
+                user.admin,
                 true,
             ),
             Some(RefreshToken {

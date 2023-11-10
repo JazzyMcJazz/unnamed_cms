@@ -8,4 +8,5 @@ pub struct SystemUser {
     pub name: String,
     pub password: String,
     pub created_at: String,
+    pub admin: bool,
 }

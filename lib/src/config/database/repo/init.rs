@@ -11,7 +11,7 @@ struct Created {
 }
 
 pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
-    dev_clear(db).await?;
+    // dev_clear(db).await?;
 
     dbg!(table_names(db, TableFilter::All).await);
 
@@ -64,6 +64,15 @@ pub async fn init(db: &Surreal<Any>) -> Result<(), Error> {
         Err(e) => {
             panic!("Error creating default admin user: {e}");
         }
+    }
+
+    let errors = result.take_errors();
+    if !errors.is_empty() {
+        println!("[");
+        for error in errors {
+            println!("\t{}: {}\n", error.0, error.1);
+        }
+        println!("]");
     }
 
     Ok(())

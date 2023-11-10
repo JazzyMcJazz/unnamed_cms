@@ -8,8 +8,8 @@ pub async fn login_page(data: web::Data<AppState>, req: HttpRequest) -> impl Res
 
     if claims.is_authenticated {
         return HttpResponse::Found()
-            .append_header(("Location", data.base_path()))
-            .append_header(("HX-Redirect", data.base_path()))
+            .append_header(("Location", data.base_path_or_root()))
+            .append_header(("HX-Redirect", data.base_path_or_root()))
             .finish();
     }
 
@@ -31,12 +31,13 @@ pub async fn login(
         return CmsError::SeeOther(data.base_path()).build_response();
     }
 
-    let cookies = match service::login(data.database(), data.base_path(), form.into_inner()).await {
-        Ok(cookies) => cookies,
-        Err(e) => {
-            return e.build_response();
-        }
-    };
+    let cookies =
+        match service::login(data.database(), data.base_path_or_root(), form.into_inner()).await {
+            Ok(cookies) => cookies,
+            Err(e) => {
+                return e.build_response();
+            }
+        };
 
     HttpResponse::Ok()
         .append_header(("Location", data.base_path())) // TODO: redirect to next
@@ -48,11 +49,11 @@ pub async fn login(
 
 pub async fn logout(data: web::Data<AppState>, req: HttpRequest) -> impl Responder {
     let claims = Extensions::unwrap_claims(&req);
-    let cookies = service::logout(data.database(), claims, data.base_path()).await;
+    let cookies = service::logout(data.database(), claims, data.base_path_or_root()).await;
 
     HttpResponse::Ok()
-        .append_header(("Location", data.base_path()))
-        .append_header(("HX-Redirect", data.base_path()))
+        .append_header(("Location", data.base_path_or_root()))
+        .append_header(("HX-Redirect", data.base_path_or_root()))
         .cookie(cookies.0)
         .cookie(cookies.1)
         .finish()

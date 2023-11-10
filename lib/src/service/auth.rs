@@ -21,6 +21,7 @@ pub async fn login<'a>(
         user.email,
         user.name,
         refresh_token.session.id.id.to_raw(),
+        user.admin,
         true,
     );
     let access_token = claims.sign_jwt()?;

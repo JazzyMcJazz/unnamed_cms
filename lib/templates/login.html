@@ -1,38 +1,35 @@
 {% extends 'containers/base.html' %}
 
 {% block main %}
-    <h1>Login</h1>
-
-    <form 
-        action="{{base_path}}/login" 
-        method="post" 
-        autocomplete="off"
-        hx-post="{{base_path}}/login"
-        hx-ext="response-targets"
-        hx-target-4*="#error"
-        hx-target-5*="#error"
-    >
-        <div>
-            <label for="email">Email</label>
-            <input type="text" name="email" id="email" value="admin@test.com">
-        </div>
-
-        <div>
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password" value="asdf1234">
-        </div>
-
-        <div>
-            <label for="remember_me">
-                <input type="checkbox" name="remember_me" id="remember_me">
-                Remember Me
-            </label>
-        </div>
-
-        <p id="error" style="color: red;"></p>
-
-        <div>
+<div class="flex h-main grow">
+    <div class="flex flex-col w-fit justify-center pl-4">
+        <h1 class="mb-4">Login</h1>
+        <form 
+            action="{{base_path}}/login" 
+            method="post" 
+            autocomplete="off"
+            hx-post="{{base_path}}/login"
+            hx-ext="response-targets"
+            hx-target-4*="#error"
+            hx-target-5*="#error"
+            class="flex flex-col gap-2"
+        >
+            <input type="text" name="email" id="email" placeholder="Email">
+            <input type="password" name="password" id="password" placeholder="Password">
+            <div>
+                <label for="remember_me">
+                    <input type="checkbox" name="remember_me" id="remember_me">
+                    Remember Me
+                </label>
+            </div>
+    
+            <p id="error" class="text-red-500 self-center"></p>
+            
             <input type="submit" value="Login">
-        </div>
-    </form>
+        </form>
+    </div>
+    <div class="flex justify-center items-center min-h-main grow">
+        <img src="{{base_path}}/assets/img/logo.png" alt="Login" class="w-[400px] rounded-full shadow-lg">
+    </div>
+</div>
 {% endblock main %}
