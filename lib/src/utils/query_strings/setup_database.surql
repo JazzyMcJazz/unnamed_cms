@@ -44,6 +44,8 @@ DEFINE FIELD description ON TABLE system_permission TYPE string;
 
 -- system_resource
 DEFINE FIELD name ON TABLE system_resource TYPE string;
+DEFINE FIELD display_name ON TABLE system_resource TYPE string
+    VALUE string::trim($value);
 DEFINE FIELD resource_type ON TABLE system_resource TYPE string
     ASSERT ['SystemTable', 'SystemField', 'Table', 'Field'] CONTAINS $value;
 DEFINE FIELD description ON TABLE system_resource TYPE string;
@@ -82,6 +84,7 @@ DEFINE EVENT user_deleted ON TABLE system_user WHEN $event = "DELETE" THEN (
 IF !(SELECT * FROM system_resource:system_user) {
     CREATE system_resource:system_user CONTENT {
         name: "system_user",
+        display_name: "System User",
         resource_type: "SystemTable",
         description: "Contains system users",
     };
@@ -89,6 +92,7 @@ IF !(SELECT * FROM system_resource:system_user) {
 IF !(SELECT * FROM system_resource:system_user_email) {
     CREATE system_resource:system_user_email CONTENT {
         name: "system_user|email",
+        display_name: "Email",
         resource_type: "SystemField",
         description: "Email address",
     };
@@ -96,6 +100,7 @@ IF !(SELECT * FROM system_resource:system_user_email) {
 IF !(SELECT * FROM system_resource:system_user_password) {
     CREATE system_resource:system_user_password CONTENT {
         name: "system_user|password",
+        display_name: "Password",
         resource_type: "SystemField",
         description: "Password",
     };
@@ -103,6 +108,7 @@ IF !(SELECT * FROM system_resource:system_user_password) {
 IF !(SELECT * FROM system_resource:system_user_name) {
     CREATE system_resource:system_user_name CONTENT {
         name: "system_user|name",
+        display_name: "Name",
         resource_type: "SystemField",
         description: "Name",
     };
@@ -110,6 +116,7 @@ IF !(SELECT * FROM system_resource:system_user_name) {
 IF !(SELECT * FROM system_resource:system_user_admin) {
     CREATE system_resource:system_user_admin CONTENT {
         name: "system_user|admin",
+        display_name: "Admin",
         resource_type: "SystemField",
         description: "Admin flag",
     };
@@ -117,6 +124,7 @@ IF !(SELECT * FROM system_resource:system_user_admin) {
 IF !(SELECT * FROM system_resource:system_user_created_at) {
     CREATE system_resource:system_user_created_at CONTENT {
         name: "system_user|created_at",
+        display_name: "Created At",
         resource_type: "SystemField",
         description: "Created at timestamp",
     };
@@ -125,6 +133,7 @@ IF !(SELECT * FROM system_resource:system_user_created_at) {
 IF !(SELECT * FROM system_resource:system_session) {
     CREATE system_resource:system_session CONTENT {
         name: "system_session",
+        display_name: "System Session",
         resource_type: "SystemTable",
         description: "Contains user sessions",
     };
@@ -132,6 +141,7 @@ IF !(SELECT * FROM system_resource:system_session) {
 IF !(SELECT * FROM system_resource:system_session_user) {
     CREATE system_resource:system_session_user CONTENT {
         name: "system_session|user",
+        display_name: "User",
         resource_type: "SystemField",
         description: "User",
     };
@@ -140,6 +150,7 @@ IF !(SELECT * FROM system_resource:system_session_user) {
 IF !(SELECT * FROM system_resource:system_session_token) {
     CREATE system_resource:system_session_token CONTENT {
         name: "system_session_token",
+        display_name: "System Session Token",
         resource_type: "SystemTable",
         description: "Contains user session tokens",
     };
@@ -147,6 +158,7 @@ IF !(SELECT * FROM system_resource:system_session_token) {
 IF !(SELECT * FROM system_resource:system_session_token_session) {
     CREATE system_resource:system_session_token_session CONTENT {
         name: "system_session_token|session",
+        display_name: "Session",
         resource_type: "SystemField",
         description: "Session",
     };
@@ -154,6 +166,7 @@ IF !(SELECT * FROM system_resource:system_session_token_session) {
 IF !(SELECT * FROM system_resource:system_session_token_token) {
     CREATE system_resource:system_session_token_token CONTENT {
         name: "system_session_token|token",
+        display_name: "Token",
         resource_type: "SystemField",
         description: "Token",
     };
@@ -161,6 +174,7 @@ IF !(SELECT * FROM system_resource:system_session_token_token) {
 IF !(SELECT * FROM system_resource:system_session_token_created_at) {
     CREATE system_resource:system_session_token_created_at CONTENT {
         name: "system_session_token|created_at",
+        display_name: "Created At",
         resource_type: "SystemField",
         description: "Created at timestamp",
     };
@@ -168,6 +182,7 @@ IF !(SELECT * FROM system_resource:system_session_token_created_at) {
 IF !(SELECT * FROM system_resource:system_session_token_expires_at) {
     CREATE system_resource:system_session_token_expires_at CONTENT {
         name: "system_session_token|expires_at",
+        display_name: "Expires At",
         resource_type: "SystemField",
         description: "Expires at timestamp",
     };
@@ -176,6 +191,7 @@ IF !(SELECT * FROM system_resource:system_session_token_expires_at) {
 IF !(SELECT * FROM system_resource:system_role) {
     CREATE system_resource:system_role CONTENT {
         name: "system_role",
+        display_name: "System Role",
         resource_type: "SystemTable",
         description: "Contains user roles",
     };
@@ -183,6 +199,7 @@ IF !(SELECT * FROM system_resource:system_role) {
 IF !(SELECT * FROM system_resource:system_role_name) {
     CREATE system_resource:system_role_name CONTENT {
         name: "system_role|name",
+        display_name: "Name",
         resource_type: "SystemField",
         description: "Name",
     };
@@ -190,6 +207,7 @@ IF !(SELECT * FROM system_resource:system_role_name) {
 IF !(SELECT * FROM system_resource:system_role_description) {
     CREATE system_resource:system_role_description CONTENT {
         name: "system_role|description",
+        display_name: "Description",
         resource_type: "SystemField",
         description: "Description",
     };
@@ -198,6 +216,7 @@ IF !(SELECT * FROM system_resource:system_role_description) {
 IF !(SELECT * FROM system_resource:system_permission) {
     CREATE system_resource:system_permission CONTENT {
         name: "system_permission",
+        display_name: "System Permission",
         resource_type: "SystemTable",
         description: "Contains permission definitions",
     };
@@ -205,6 +224,7 @@ IF !(SELECT * FROM system_resource:system_permission) {
 IF !(SELECT * FROM system_resource:system_permission_name) {
     CREATE system_resource:system_permission_name CONTENT {
         name: "system_permission|name",
+        display_name: "Name",
         resource_type: "SystemField",
         description: "Name",
     };
@@ -212,6 +232,7 @@ IF !(SELECT * FROM system_resource:system_permission_name) {
 IF !(SELECT * FROM system_resource:system_permission_description) {
     CREATE system_resource:system_permission_description CONTENT {
         name: "system_permission|description",
+        display_name: "Description",
         resource_type: "SystemField",
         description: "Description",
     };
@@ -220,6 +241,7 @@ IF !(SELECT * FROM system_resource:system_permission_description) {
 IF !(SELECT * FROM system_resource:system_resource) {
     CREATE system_resource:system_resource CONTENT {
         name: "system_resource",
+        display_name: "System Resource",
         resource_type: "SystemTable",
         description: "Contains resource definitions",
     };
@@ -227,6 +249,7 @@ IF !(SELECT * FROM system_resource:system_resource) {
 IF !(SELECT * FROM system_resource:system_resource_name) {
     CREATE system_resource:system_resource_name CONTENT {
         name: "system_resource|name",
+        display_name: "Name",
         resource_type: "SystemField",
         description: "Name",
     };
@@ -234,6 +257,7 @@ IF !(SELECT * FROM system_resource:system_resource_name) {
 IF !(SELECT * FROM system_resource:system_resource_type) {
     CREATE system_resource:system_resource_type CONTENT {
         name: "system_resource|resource_type",
+        display_name: "Type",
         resource_type: "SystemField",
         description: "Type",
     };
@@ -241,6 +265,7 @@ IF !(SELECT * FROM system_resource:system_resource_type) {
 IF !(SELECT * FROM system_resource:system_resource_description) {
     CREATE system_resource:system_resource_description CONTENT {
         name: "system_resource|description",
+        display_name: "Description",
         resource_type: "SystemField",
         description: "Description",
     };
@@ -248,6 +273,7 @@ IF !(SELECT * FROM system_resource:system_resource_description) {
 IF !(SELECT * FROM system_resource:system_resource_created_at) {
     CREATE system_resource:system_resource_created_at CONTENT {
         name: "system_resource|created_at",
+        display_name: "Created At",
         resource_type: "SystemField",
         description: "Created at timestamp",
     };
@@ -255,6 +281,7 @@ IF !(SELECT * FROM system_resource:system_resource_created_at) {
 IF !(SELECT * FROM system_resource:system_resource_updated_at) {
     CREATE system_resource:system_resource_updated_at CONTENT {
         name: "system_resource|updated_at",
+        display_name: "Updated At",
         resource_type: "SystemField",
         description: "Last time that resource was updated",
     };

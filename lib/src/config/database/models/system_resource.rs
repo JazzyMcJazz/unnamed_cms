@@ -13,6 +13,7 @@ pub enum ResourceType {
 pub struct SystemResource {
     id: Thing,
     name: String,
+    display_name: String,
     resource_type: ResourceType,
     description: String,
     created_at: String,

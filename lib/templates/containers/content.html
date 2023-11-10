@@ -10,8 +10,8 @@
     
             <div class="flex flex-col gap-2 w-full">
                 {% for table in tables %}
-                    <a href="/" class="bg-slate-700 hover:brightness-125 w-full flex justify-start p-1 rounded-md">
-                        {{table.name}}
+                    <a href="/" title="{{table.description}}" class="bg-slate-700 hover:brightness-125 w-full flex justify-start p-1 rounded-md">
+                        {{table.display_name}}
                     </a>
                 {% endfor %}
             </div>
