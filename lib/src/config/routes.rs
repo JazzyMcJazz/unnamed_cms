@@ -15,8 +15,8 @@ pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
             )
             .service(
                 web::scope("")
-                    .wrap(Authorization::new(base_path))
-                    .route("", web::get().to(api::html::index))
+                    .wrap(Authorization {})
+                    .route( if base_path.is_empty() { "/" } else { "" }, web::get().to(api::html::index))
                     .route("/logout", web::post().to(api::html::logout)),
             ),
     );

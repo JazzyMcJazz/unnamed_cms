@@ -75,7 +75,7 @@ impl UnnamedCms {
     pub fn new(database: Surreal<Any>) -> Self {
         Self {
             database,
-            base_path: "/cms",
+            base_path: "",
         }
     }
 
@@ -100,7 +100,8 @@ impl UnnamedCms {
     ///
     /// The default base path is `/cms`
     ///
-    pub fn base_path(mut self, base_path: &'static str) -> Self {
+    pub fn base_path(mut self, mut base_path: &'static str) -> Self {
+        if base_path == "/" { base_path = "" }
         self.base_path = base_path;
         self
     }

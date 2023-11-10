@@ -135,15 +135,7 @@ where
 /// Middleware for authorizing users
 /// Checks if the user is logged in
 /// Should be applied only to protected routes
-pub struct Authorization {
-    base_path: &'static str,
-}
-
-impl Authorization {
-    pub fn new(base_path: &'static str) -> Self {
-        Authorization { base_path }
-    }
-}
+pub struct Authorization;
 
 impl<S, B> Transform<S, ServiceRequest> for Authorization
 where
@@ -158,15 +150,13 @@ where
 
     fn new_transform(&self, service: S) -> Self::Future {
         ready(Ok(AuthorizationMiddleware {
-            service,
-            base_path: self.base_path,
+            service
         }))
     }
 }
 
 pub struct AuthorizationMiddleware<S> {
     service: S,
-    base_path: &'static str,
 }
 
 impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
@@ -185,7 +175,7 @@ where
         if req.extensions().get::<Claims>().is_none()
             || !req.extensions().get::<Claims>().unwrap().is_authenticated
         {
-            let base_path = self.base_path;
+            let base_path = req.app_data::<web::Data<AppState>>().unwrap().base_path();
             return Box::pin(async move {
                 Err(AuthError {
                     base_path,
