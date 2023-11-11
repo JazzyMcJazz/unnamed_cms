@@ -12,7 +12,7 @@ use std::{
 };
 use tera::Context;
 
-use crate::{config::app_state::AppState, service::handle_authentication};
+use crate::{config::app_state::AppState, service::AuthService};
 
 use super::claims::Claims;
 
@@ -80,7 +80,7 @@ where
         Box::pin(async move {
             // Add the user to the context (if they are logged in)
             let (claims, refresh_token) =
-                handle_authentication(state.database(), (cms_id, cms_r)).await;
+                AuthService::handle_authentication(state.database(), (cms_id, cms_r)).await;
 
             context.insert("user", &claims);
             req.extensions_mut().insert(claims.clone());

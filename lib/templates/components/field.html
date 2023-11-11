@@ -1,12 +1,12 @@
 <div type="field" id="{{field.id}}" class="flex gap-2 mb-4">
     <div class="flex flex-col gap-2">
-        <label>Field Name</label>
+        <label>Name</label>
         <input 
             class="{% if field.errors.name %} form-error {% endif %}"
             type="text" name="{{field.id}}-name" placeholder="Give the field a name" autocomplete="off" value="{{field.name}}">
     </div>
     <div class="flex flex-col gap-2">
-        <label>Field Type</label>
+        <label>Type</label>
         <select name="{{field.id}}-type">
             {% for type in field_types %}
                 {% if type == field.field_type %}
@@ -18,23 +18,28 @@
         </select>
     </div>
     <div class="flex flex-col gap-2">
-        <label>Field Description</label>
+        <label>Description</label>
         <input type="text" name="{{field.id}}-description" placeholder="Describe the field [optional]" autocomplete="off" value="{{field.description}}">
     </div>
     <div class="flex flex-col gap-2">
-        <label>Field Default Value</label>
+        <label>Default Value</label>
         <input type="text" name="{{field.id}}-default_value" placeholder="Default value for the field [optional]" autocomplete="off" value="{{field.default_value}}">
     </div>
     <div class="flex flex-col items-start gap-2">
-        <label class="mb-4">Field Required</label>
+        <label class="mb-4">Required</label>
         <input type="checkbox" name="{{field.id}}-required" {% if field.required %} checked {% endif %}>
+    </div>
+
+    <div class="flex flex-col items-start gap-2">
+        <label class="mb-4">Unique</label>
+        <input type="checkbox" name="{{field.id}}-unique" {% if field.unique %} checked {% endif %}>
     </div>
 </div>
 
 {% if include_next %}
     <span id="next">
         <button
-            hx-get="{{base_path}}/content/+/{{next_id}}"
+            hx-get="{{base_path}}/collections/+/{{next_id}}"
             hx-target="#next"
             hx-swap="outerHTML"
         >Add Field</button>

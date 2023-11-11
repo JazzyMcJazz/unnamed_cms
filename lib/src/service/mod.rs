@@ -1,7 +1,5 @@
 mod auth;
-mod content;
+mod collections;
 
-pub use self::auth::handle_authentication;
-pub use self::auth::login;
-pub use self::auth::logout;
-pub use self::content::*;
+pub use self::auth::*;
+pub use self::collections::*;

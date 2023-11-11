@@ -47,7 +47,7 @@ DEFINE FIELD name ON TABLE system_resource TYPE string;
 DEFINE FIELD display_name ON TABLE system_resource TYPE string
     VALUE string::trim($value);
 DEFINE FIELD resource_type ON TABLE system_resource TYPE string
-    ASSERT ['SystemTable', 'SystemField', 'Table', 'Field'] CONTAINS $value;
+    ASSERT ['SystemCollection', 'SystemField', 'Collection', 'Field'] CONTAINS $value;
 DEFINE FIELD description ON TABLE system_resource TYPE string;
 DEFINE FIELD created_at ON TABLE system_resource TYPE datetime
     DEFAULT time::now();
@@ -85,7 +85,7 @@ IF !(SELECT * FROM system_resource:system_user) {
     CREATE system_resource:system_user CONTENT {
         name: "system_user",
         display_name: "System User",
-        resource_type: "SystemTable",
+        resource_type: "SystemCollection",
         description: "Contains system users",
     };
 };
@@ -134,7 +134,7 @@ IF !(SELECT * FROM system_resource:system_session) {
     CREATE system_resource:system_session CONTENT {
         name: "system_session",
         display_name: "System Session",
-        resource_type: "SystemTable",
+        resource_type: "SystemCollection",
         description: "Contains user sessions",
     };
 };
@@ -151,7 +151,7 @@ IF !(SELECT * FROM system_resource:system_session_token) {
     CREATE system_resource:system_session_token CONTENT {
         name: "system_session_token",
         display_name: "System Session Token",
-        resource_type: "SystemTable",
+        resource_type: "SystemCollection",
         description: "Contains user session tokens",
     };
 };
@@ -192,7 +192,7 @@ IF !(SELECT * FROM system_resource:system_role) {
     CREATE system_resource:system_role CONTENT {
         name: "system_role",
         display_name: "System Role",
-        resource_type: "SystemTable",
+        resource_type: "SystemCollection",
         description: "Contains user roles",
     };
 };
@@ -217,7 +217,7 @@ IF !(SELECT * FROM system_resource:system_permission) {
     CREATE system_resource:system_permission CONTENT {
         name: "system_permission",
         display_name: "System Permission",
-        resource_type: "SystemTable",
+        resource_type: "SystemCollection",
         description: "Contains permission definitions",
     };
 };
@@ -242,7 +242,7 @@ IF !(SELECT * FROM system_resource:system_resource) {
     CREATE system_resource:system_resource CONTENT {
         name: "system_resource",
         display_name: "System Resource",
-        resource_type: "SystemTable",
+        resource_type: "SystemCollection",
         description: "Contains resource definitions",
     };
 };

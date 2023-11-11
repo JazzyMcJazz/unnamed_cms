@@ -25,6 +25,14 @@
         @apply border-red-600;
     }
 
+    .save-button {
+        @apply bg-green-600 hover:bg-green-700 border-green-500 w-10 h-10 rounded-full;
+    }
+
+    .disabled {
+        @apply bg-gray-700 hover:bg-gray-700 hover:!brightness-100 border-gray-500 !cursor-not-allowed;
+    }
+
     h1 {
         @apply text-4xl font-bold
     }

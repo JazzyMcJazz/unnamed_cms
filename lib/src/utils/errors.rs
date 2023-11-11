@@ -11,37 +11,36 @@ impl ErrorResponse {
     }
 }
 
-pub enum CmsError {
-    SeeOther(&'static str),
+pub enum CmsResponse {
+    SeeOther(String),
     Unauthorized(Option<&'static str>),
     NotFound(Option<&'static str>),
     InternalServerError(Option<&'static str>),
 }
 
-impl CmsError {
+impl CmsResponse {
     pub fn build_response(&self) -> HttpResponse {
-        match self {
-            CmsError::SeeOther(location) => HttpResponse::SeeOther()
-                .append_header(("Location", *location))
-                .append_header(("HX-Redirect", *location))
-                .finish(),
-            CmsError::Unauthorized(message) => {
-                ErrorResponse::build(401, message.unwrap_or("Unauthorized"))
+        let (c, m) = match self {
+            CmsResponse::SeeOther(location) => {
+                return HttpResponse::SeeOther()
+                    .append_header(("Location", location.to_owned()))
+                    .append_header(("HX-Redirect", location.to_owned()))
+                    .finish()
             }
-            CmsError::NotFound(message) => {
-                ErrorResponse::build(404, message.unwrap_or("Not Found"))
+            CmsResponse::Unauthorized(message) => (401, message.unwrap_or("Unauthorized")),
+            CmsResponse::NotFound(message) => (404, message.unwrap_or("Not Found")),
+            CmsResponse::InternalServerError(message) => {
+                (500, message.unwrap_or("Internal Server Error"))
             }
-            CmsError::InternalServerError(message) => {
-                ErrorResponse::build(500, message.unwrap_or("Internal Server Error"))
-            }
-        }
+        };
+        ErrorResponse::build(c, m)
     }
 
-    pub fn from<T>(error: T) -> CmsError
+    pub fn from<T>(error: T) -> CmsResponse
     where
         T: std::fmt::Debug,
     {
         dbg!(error);
-        CmsError::InternalServerError(None)
+        CmsResponse::InternalServerError(None)
     }
 }

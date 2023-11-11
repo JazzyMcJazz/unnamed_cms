@@ -3,6 +3,7 @@ pub static SETUP_DATABASE: &str = include_str!("./setup_database.surql");
 pub static DEV_CLEAR: &str = "REMOVE DATABASE cms;";
 
 // Create
+pub static CREATE_RESOURCE: &str = include_str!("./create_resource.surql");
 pub static CREATE_SESSION: &str = include_str!("./create_session.surql");
 
 // Read

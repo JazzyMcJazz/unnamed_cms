@@ -9,8 +9,8 @@ case "$1" in
         chmod +x tailwindcss-linux-x64
         mv tailwindcss-linux-x64 twcss
     ;;
-    init*)  ./twcss init;;
+    # init*)  ./twcss init;;
     watch*) ./twcss -i input.css -o lib/static/css/styles.css --watch;;
     compile*) ./twcss -i input.css -o lib/static/css/styles.css --minify;;
-    *) echo "Usage: $0 {install|init|watch|compile}"; exit 1;;
+    *) echo "Usage: $0 {install|watch|compile}"; exit 1;;
 esac

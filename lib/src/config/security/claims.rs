@@ -54,7 +54,7 @@ impl Claims {
         }
     }
 
-    pub fn sign_jwt(&self) -> Result<String, CmsError> {
+    pub fn sign_jwt(&self) -> Result<String, CmsResponse> {
         let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
         let token = match encode(
@@ -63,13 +63,13 @@ impl Claims {
             &EncodingKey::from_secret(secret.as_ref()),
         ) {
             Ok(token) => token,
-            Err(e) => return Err(CmsError::from(e)),
+            Err(e) => return Err(CmsResponse::from(e)),
         };
 
         Ok(token)
     }
 
-    pub fn from_jwt(token: &str) -> Result<Self, CmsError> {
+    pub fn from_jwt(token: &str) -> Result<Self, CmsResponse> {
         let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
         let claims = match decode::<Claims>(
@@ -78,7 +78,7 @@ impl Claims {
             &jsonwebtoken::Validation::default(),
         ) {
             Ok(token) => token.claims,
-            Err(_) => return Err(CmsError::Unauthorized(None)),
+            Err(_) => return Err(CmsResponse::Unauthorized(None)),
         };
 
         Ok(claims)

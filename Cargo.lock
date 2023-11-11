@@ -3851,6 +3851,7 @@ dependencies = [
  "chrono",
  "futures-util",
  "jsonwebtoken",
+ "regex",
  "serde",
  "surrealdb",
  "tera",

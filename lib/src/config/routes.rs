@@ -1,15 +1,19 @@
 use actix_files::Files;
-use actix_web::web::{self, ServiceConfig};
+use actix_web::{
+    middleware::DefaultHeaders,
+    web::{self, ServiceConfig},
+};
 
 use crate::api;
 
 use super::security::middlware::{Authentication, Authorization};
 
 pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
-    cfg.service(Files::new(
-        format!("{base_path}/assets").as_str(),
-        "./lib/static",
-    ));
+    cfg.service(
+        web::scope(format!("{base_path}/assets").as_str())
+            .wrap(DefaultHeaders::new().add(("Cache-Control", "max-age=3600")))
+            .service(Files::new("", "./lib/static")),
+    );
 
     cfg.service(
         web::scope(base_path)
@@ -27,10 +31,9 @@ pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
                         web::get().to(api::html::index),
                     )
                     .route("/logout", web::post().to(api::html::logout))
-                    .route("/content", web::get().to(api::html::content_index))
-                    .route("/content", web::post().to(api::html::content_add))
-                    .route("/content/+", web::get().to(api::html::content_add))
-                    .route("/content/+/{id}", web::get().to(api::html::get_field)),
+                    .route("/collections", web::get().to(api::html::collections_index))
+                    .route("/collections", web::post().to(api::html::collections_add))
+                    .route("/collections/+", web::get().to(api::html::collections_add)),
             ),
     );
 }
