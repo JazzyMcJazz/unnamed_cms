@@ -11,6 +11,6 @@ case "$1" in
     ;;
     init*)  ./twcss init;;
     watch*) ./twcss -i input.css -o lib/static/css/styles.css --watch;;
-    compile*) ./twcss -i input.css -o output.css --minify;;
+    compile*) ./twcss -i input.css -o lib/static/css/styles.css --minify;;
     *) echo "Usage: $0 {install|init|watch|compile}"; exit 1;;
 esac
