@@ -27,7 +27,10 @@ pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
                         web::get().to(api::html::index),
                     )
                     .route("/logout", web::post().to(api::html::logout))
-                    .route("/content", web::get().to(api::html::content_index)),
+                    .route("/content", web::get().to(api::html::content_index))
+                    .route("/content", web::post().to(api::html::content_add))
+                    .route("/content/+", web::get().to(api::html::content_add))
+                    .route("/content/+/{id}", web::get().to(api::html::get_field)),
             ),
     );
 }

@@ -84,10 +84,7 @@ where
 
             context.insert("user", &claims);
             req.extensions_mut().insert(claims.clone());
-            // Add the context to the request extensions
-            if req.method() == "GET" {
-                req.extensions_mut().insert(context);
-            }
+            req.extensions_mut().insert(context);
 
             let mut res = svc.call(req).await?;
 

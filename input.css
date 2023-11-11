@@ -12,6 +12,19 @@
         @apply cursor-pointer hover:brightness-125;
     }
 
+    input[type="checkbox"] {
+        @apply cursor-pointer;
+    }
+
+    select {
+        @apply bg-bg border-2 border-slate-600 p-[10px] rounded-md;
+        @apply placeholder-gray-400 text-gray-200;
+    }
+
+    .form-error {
+        @apply border-red-600;
+    }
+
     h1 {
         @apply text-4xl font-bold
     }

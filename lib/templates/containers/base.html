@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{base_path}}/assets/css/styles.css">
     <title>Unnamed CMS</title>
 </head>
-<body hx-boost="true" class="flex bg-bg text-gray-100">
+<body hx-boost="true" class="bg-bg text-gray-100">
     <div class="min-h-screen">
         <nav class="flex justify-between w-screen bg-nav border-b-2 border-slate-700 p-4">
             <div>
@@ -29,7 +29,7 @@
                 {% include 'components/sidebar.html' %}
             {% endif %}
             
-            <main class="min-h-main">
+            <main class="grow min-h-main">
                 {% block main %}
                 {% endblock %}
             </main>
