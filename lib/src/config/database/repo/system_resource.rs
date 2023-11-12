@@ -9,16 +9,8 @@ pub async fn create(
     // Unsafe approach, but it's currently the only way to create a table with a dynamic name
     // The risk is mitigated by the fact that the table name is validated before this function is called
     // This is further reinforced that resource.name is private and is guaranteed to be sanitized through the SystemResource::from_form function
-    let query = format!(
-        r#"
-        BEGIN TRANSACTION;
-        {}
-        DEFINE TABLE {} SCHEMAFULL;
-        COMMIT TRANSACTION;
-    "#,
-        CREATE_RESOURCE,
-        resource.name()
-    );
+    let query = CREATE_RESOURCE.replace("{$name}", resource.name().as_str());
+
     dbg!(&query);
     let mut result = match db
         .query(query)

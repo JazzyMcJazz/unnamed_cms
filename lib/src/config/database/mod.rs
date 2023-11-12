@@ -5,8 +5,8 @@ use surrealdb::{engine::any::Any, Error, Surreal};
 
 use crate::utils::CmsResponse;
 
-use self::models::*;
-pub use self::models::{ResourceType, SystemResource};
+pub use self::models::{Field, ResourceType, SystemResource};
+use self::{models::*, repo::collection::CollectionRepo};
 
 #[async_trait::async_trait]
 pub trait Repository {
@@ -36,6 +36,9 @@ pub trait Repository {
 
     // DELETE
     async fn delete_session(&self, session_id: String) -> Result<(), CmsResponse>;
+
+    // OTHER
+    fn collections(&self) -> CollectionRepo;
 }
 
 #[async_trait::async_trait]
@@ -80,5 +83,10 @@ impl Repository for Surreal<Any> {
     // Delete
     async fn delete_session(&self, session_id: String) -> Result<(), CmsResponse> {
         repo::session::delete_session(self, session_id).await
+    }
+
+    // Other
+    fn collections(&self) -> CollectionRepo {
+        CollectionRepo::new(self)
     }
 }

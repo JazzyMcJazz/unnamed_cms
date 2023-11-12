@@ -4,9 +4,10 @@ use actix_web::{
     web::{self, ServiceConfig},
 };
 
-use crate::api;
-
-use super::security::middlware::{Authentication, Authorization};
+use crate::{
+    api,
+    middleware::{AddCollectionData, Authentication, Authorization},
+};
 
 pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
     cfg.service(
@@ -31,9 +32,14 @@ pub fn configure(cfg: &mut ServiceConfig, base_path: &'static str) {
                         web::get().to(api::html::index),
                     )
                     .route("/logout", web::post().to(api::html::logout))
-                    .route("/collections", web::get().to(api::html::collections_index))
-                    .route("/collections", web::post().to(api::html::collections_add))
-                    .route("/collections/+", web::get().to(api::html::collections_add)),
+                    .service(
+                        web::scope("/collections")
+                            .wrap(AddCollectionData {})
+                            .route("", web::get().to(api::html::collections_index))
+                            .route("", web::post().to(api::html::collections_new))
+                            .route("/+", web::get().to(api::html::collections_new))
+                            .route("/{collection}", web::get().to(api::html::collection_data)),
+                    ),
             ),
     );
 }

@@ -1,0 +1,32 @@
+{% if records | length == 0 %}
+    <p>No data found</p>
+{% else %}
+<table class="w-full">
+    <thead>
+        <tr class="text-left">
+        {% for field in fields | sort(attribute="name") %}
+            <th class="p-2 max-w-[250px] text-ellipsis overflow-hidden whitespace-nowrap">
+                {{field.name}}
+            </th>
+        {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in records %}
+            <tr>
+            {% for key, value in record %}
+                {% if key == "id" %}
+                    {% continue %}
+                {% endif %}
+                <td class="p-2">
+                    <div class="text-left max-w-[250px] text-ellipsis overflow-hidden whitespace-nowrap">
+                        {{value}}
+                    </div>
+                </td>
+            {% endfor %}
+                
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}

@@ -3,6 +3,5 @@ pub mod app_state;
 pub mod database;
 pub mod routes;
 
-mod security;
-
-pub use self::security::claims::{Claims, RefreshToken};
+mod claims;
+pub use claims::{Claims, RefreshToken};

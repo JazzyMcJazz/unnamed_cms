@@ -1,0 +1,1 @@
+SELECT type::fields($fields) FROM type::table($table);

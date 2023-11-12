@@ -3853,6 +3853,7 @@ dependencies = [
  "jsonwebtoken",
  "regex",
  "serde",
+ "serde_json",
  "surrealdb",
  "tera",
 ]

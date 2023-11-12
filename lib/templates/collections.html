@@ -1,3 +1,32 @@
-{% extends 'containers/collections.html' %}
+{% extends 'containers/base.html' %}
 
-<p>Todo!</p>
+{% block main %}
+    <div class="flex flex-grow">
+        <aside class="h-main overflow-y-auto bg-slate-800 w-64 px-4 pt-2">
+            <div class="flex justify-between items-center mb-2">
+                <h5>Collections</h5>
+                <button
+                    class="text-green-500 text-2xl font-bold hover:cursor-pointer"
+                    hx-get="{{base_path}}/collections/+" 
+                    hx-target="#content"
+                    hx-swap="innerHTML"
+                >+</button>
+            </div>
+    
+            <div class="flex flex-col gap-2 w-full">
+                {% for collection in collections %}
+                    <button 
+                        title="{{collection.description}}" 
+                        class="bg-slate-700 hover:brightness-125 w-full flex justify-start p-1 rounded-md"
+                        hx-get="{{base_path}}/collections/{{collection.name}}" 
+                        hx-target="#content"
+                        hx-swap="innerHTML"
+                    >
+                        {{collection.display_name}}
+                    </button>
+                {% endfor %}
+            </div>
+        </aside>
+        <section id="content" class="p-4 w-[calc(100vw-96px-256px)] h-main overflow-y-auto overflow-x-auto"></section>
+    </div>
+{% endblock main %}

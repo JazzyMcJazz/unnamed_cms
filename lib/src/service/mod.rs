@@ -1,5 +1,5 @@
-mod auth;
-mod collections;
+mod auth_service;
+mod collections_service;
 
-pub use self::auth::*;
-pub use self::collections::*;
+pub use self::auth_service::*;
+pub use self::collections_service::*;

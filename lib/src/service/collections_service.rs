@@ -1,4 +1,10 @@
-use crate::{api::html::CollectionForm, config::database::SystemResource, prelude::*};
+use serde_json::Value;
+
+use crate::{
+    api::html::CollectionForm,
+    config::database::{Field, SystemResource},
+    prelude::*,
+};
 
 pub struct CollectionService;
 
@@ -11,6 +17,16 @@ impl CollectionService {
         let resource = db.create_resource(&collection).await?;
         let target = format!("/collections/{}", resource.id().unwrap());
         Ok(CmsResponse::SeeOther(target))
+    }
+
+    pub async fn find_all(
+        db: &Surreal<Any>,
+        collection: String,
+    ) -> Result<(Vec<Field>, Vec<Value>), CmsResponse> {
+        dbg!(&collection);
+
+        let data = db.collections().find_all(collection).await?;
+        Ok(data)
     }
 }
 

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{config::database::ResourceType, prelude::*, service::CollectionService};
+use crate::{prelude::*, service::CollectionService};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CollectionForm {
@@ -25,25 +25,18 @@ impl CollectionForm {
 }
 
 pub async fn collections_index(data: web::Data<AppState>, req: HttpRequest) -> impl Responder {
-    let db = data.database();
-    let mut context = Extensions::unwrap_context(&req);
-
-    let tables = match db.find_resource_by_type(ResourceType::Collection).await {
-        Ok(tables) => tables,
-        Err(e) => return e.build_response(),
-    };
-
-    context.insert("tables", &tables);
-
+    let context = Extensions::unwrap_context(&req);
     let tera = &data.tera();
     let html = tera
         .render("collections.html", &context)
         .unwrap_or_else(|e| tera.template_error(e));
 
+    dbg!(&context);
+
     HttpResponse::Ok().body(html)
 }
 
-pub async fn collections_add(
+pub async fn collections_new(
     data: web::Data<AppState>,
     form: Option<web::Form<CollectionForm>>,
     req: HttpRequest,
@@ -59,21 +52,40 @@ pub async fn collections_add(
 
         collection = CollectionForm::from(form);
         return match CollectionService::create(db, &collection).await {
-            Ok(e) => e.build_response(),
+            Ok(r) => r.build_response(),
             Err(e) => e.build_response(),
         };
     }
 
     context.insert("collection", &collection);
 
-    match db.find_resource_by_type(ResourceType::Collection).await {
-        Ok(tables) => context.insert("tables", &tables),
+    let tera = &data.tera();
+    let html = tera
+        .render("components/new_collection.html", &context)
+        .unwrap_or_else(|e| tera.template_error(e));
+
+    HttpResponse::Ok().body(html)
+}
+
+pub async fn collection_data(
+    data: web::Data<AppState>,
+    collection: web::Path<String>,
+    req: HttpRequest,
+) -> impl Responder {
+    let db = data.database();
+    let mut context = Extensions::unwrap_context(&req);
+
+    let (fields, records) = match CollectionService::find_all(db, collection.into_inner()).await {
+        Ok(data) => data,
         Err(e) => return e.build_response(),
     };
+    dbg!(&records);
+    context.insert("fields", &fields);
+    context.insert("records", &records);
 
     let tera = &data.tera();
     let html = tera
-        .render("collections_+.html", &context)
+        .render("components/records.html", &context)
         .unwrap_or_else(|e| tera.template_error(e));
 
     HttpResponse::Ok().body(html)
